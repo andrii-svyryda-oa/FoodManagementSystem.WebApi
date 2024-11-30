@@ -27,8 +27,8 @@ public class User
         CreatedAt = createdAt;
     }
 
-    public static User New(UserId id, string name, string email, string password, UserRole role, decimal balance)
-        => new(id, name, email, password, role, balance, DateTime.UtcNow);
+    public static User New(UserId id, string name, string email, string password, UserRole role)
+        => new(id, name, email, password, role, 0, DateTime.UtcNow);
 
     public void UpdateDetails(string name, string email)
     {

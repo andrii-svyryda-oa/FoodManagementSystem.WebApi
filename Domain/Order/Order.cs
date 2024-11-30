@@ -7,8 +7,8 @@ namespace Domain.Orders;
 public class Order
 {
     public OrderId Id { get; }
-    public UserId OwnerId { get; }
     public string Name { get; private set; }
+    public UserId OwnerId { get; }
     public DateTime CreatedAt { get; private set; }
     public RestaurantId RestaurantId { get; private set; }
     public Restaurant? Restaurant { get; private set; }
@@ -25,11 +25,12 @@ public class Order
         CreatedAt = createdAt;
     }
 
-    public static Order New(OrderId id, UserId ownerId, string name, RestaurantId restaurantId, OrderState state)
-        => new(id, ownerId, name, restaurantId, state, DateTime.UtcNow);
+    public static Order New(OrderId id, UserId ownerId, string name, RestaurantId restaurantId)
+        => new(id, ownerId, name, restaurantId, OrderState.Opened, DateTime.UtcNow);
 
-    public void UpdateState(OrderState state)
+    public void UpdateDetails(string name, OrderState state)
     {
+        Name = name;
         State = state;
     }
 }

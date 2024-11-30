@@ -7,7 +7,7 @@ namespace Infrastructure.Persistence.Configurations;
 
 public static class UserSeeder
 {
-    public static void Seed(EntityTypeBuilder<User> builder, IPasswordHasher passwordHasher)
+    public static void Seed(EntityTypeBuilder<User> builder)
     {
         builder.HasData([
             new User(

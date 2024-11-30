@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Users;
+using Optional;
 
-namespace Application.Common.Interfaces.Queries
+namespace Application.Common.Interfaces.Queries;
+
+public interface IUserQueries
 {
-    internal interface IUserQueries
-    {
-    }
+    Task<IReadOnlyList<User>> GetAll(CancellationToken cancellationToken);
+    Task<Option<User>> GetById(UserId id, CancellationToken cancellationToken);
 }

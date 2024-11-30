@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.OrderItems;
+using Optional;
 
-namespace Application.Common.Interfaces.Queries
+namespace Application.Common.Interfaces.Repositories;
+
+public interface IOrderItemRepository
 {
-    internal interface IOrderItemRepository
-    {
-    }
+    Task<OrderItem> Add(OrderItem orderItem, CancellationToken cancellationToken);
+    Task<OrderItem> Update(OrderItem orderItem, CancellationToken cancellationToken);
+    Task<OrderItem> Delete(OrderItem orderItem, CancellationToken cancellationToken);
+    Task<Option<OrderItem>> GetById(OrderItemId id, CancellationToken cancellationToken);
 }

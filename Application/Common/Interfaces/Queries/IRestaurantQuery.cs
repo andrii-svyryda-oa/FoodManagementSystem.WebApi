@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Restaurants;
 
-namespace Application.Common.Interfaces.Queries
+namespace Application.Common.Interfaces.Queries;
+
+public interface IRestaurantQueries
 {
-    internal interface IRestaurantQueries
-    {
-    }
+    Task<IReadOnlyList<Restaurant>> GetAll(CancellationToken cancellationToken);
 }

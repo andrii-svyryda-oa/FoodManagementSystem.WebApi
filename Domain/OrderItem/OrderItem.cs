@@ -24,4 +24,10 @@ public class OrderItem
 
     public static OrderItem New(OrderItemId id, string name, decimal price, UserId userId, OrderId orderId)
         => new(id, name, price, userId, orderId, DateTime.UtcNow);
+
+    public void UpdateDetails(string name, decimal price)
+    {
+        Price = price;
+        Name = name;
+    }
 }

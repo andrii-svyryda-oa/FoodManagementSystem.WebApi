@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.OrderItems;
+using Domain.Orders;
 
-namespace Application.Common.Interfaces.Queries
+namespace Application.Common.Interfaces.Queries;
+
+public interface IOrderItemQueries
 {
-    internal interface IOrderItemQueries
-    {
-    }
+    Task<IReadOnlyList<OrderItem>> GetByOrderId(OrderId orderId, CancellationToken cancellationToken);
 }

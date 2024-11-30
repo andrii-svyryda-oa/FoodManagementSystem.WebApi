@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.BalanceHistories;
 
-namespace Application.Common.Interfaces.Queries
+namespace Application.Common.Interfaces.Repositories;
+
+public interface IBalanceHistoryRepository
 {
-    internal interface IBalanceHistoryRepository
-    {
-    }
+    Task<BalanceHistory> Add(BalanceHistory balanceHistory, CancellationToken cancellationToken);
 }

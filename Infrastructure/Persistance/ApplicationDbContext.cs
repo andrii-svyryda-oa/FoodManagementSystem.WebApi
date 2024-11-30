@@ -10,16 +10,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
-    private readonly IPasswordHasher passwordHasher;
-
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IPasswordHasher passwordHasher)
-        : base(options)
-    {
-        this.passwordHasher = passwordHasher;
-    }
-
     public DbSet<User> Users { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
@@ -30,7 +22,7 @@ public class ApplicationDbContext : DbContext
     {
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
-        UserSeeder.Seed(builder.Entity<User>(), passwordHasher);
+        UserSeeder.Seed(builder.Entity<User>());
 
         base.OnModelCreating(builder);
     }

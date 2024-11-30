@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.BalanceHistories;
+using Domain.Users;
+using Optional;
 
-namespace Application.Common.Interfaces.Queries
+namespace Application.Common.Interfaces.Queries;
+
+public interface IBalanceHistoryQueries
 {
-    internal interface IBalanceHistoryQueries
-    {
-    }
+    Task<IReadOnlyList<BalanceHistory>> GetByUserId(UserId userId, CancellationToken cancellationToken);
 }

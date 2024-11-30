@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Users;
+using Optional;
 
-namespace Application.Common.Interfaces.Queries
+namespace Application.Common.Interfaces.Repositories;
+
+public interface IUserRepository
 {
-    internal interface IUserRepository
-    {
-    }
+    Task<User> Add(User user, CancellationToken cancellationToken);
+    Task<User> Update(User user, CancellationToken cancellationToken);
+    Task<User> Delete(User user, CancellationToken cancellationToken);
+    Task<Option<User>> GetById(UserId id, CancellationToken cancellationToken);
+    Task<Option<User>> GetByEmail(string email, CancellationToken cancellationToken);
 }
