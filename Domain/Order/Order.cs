@@ -1,4 +1,6 @@
-﻿using Domain.Users;
+﻿using Domain.OrderItems;
+using Domain.Restaurants;
+using Domain.Users;
 
 namespace Domain.Orders;
 
@@ -8,10 +10,12 @@ public class Order
     public UserId OwnerId { get; }
     public string Name { get; private set; }
     public DateTime CreatedAt { get; private set; }
-    public Guid RestaurantId { get; private set; }
-    public string State { get; private set; } // Opened | Closed | Cancelled
+    public RestaurantId RestaurantId { get; private set; }
+    public Restaurant? Restaurant { get; private set; }
+    public OrderState State { get; private set; }
+    public List<OrderItem>? Items { get; private set; }
 
-    private Order(OrderId id, UserId ownerId, string name, Guid restaurantId, string state, DateTime createdAt)
+    private Order(OrderId id, UserId ownerId, string name, RestaurantId restaurantId, OrderState state, DateTime createdAt)
     {
         Id = id;
         OwnerId = ownerId;
@@ -21,10 +25,10 @@ public class Order
         CreatedAt = createdAt;
     }
 
-    public static Order New(OrderId id, UserId ownerId, string name, Guid restaurantId, string state)
+    public static Order New(OrderId id, UserId ownerId, string name, RestaurantId restaurantId, OrderState state)
         => new(id, ownerId, name, restaurantId, state, DateTime.UtcNow);
 
-    public void UpdateState(string state)
+    public void UpdateState(OrderState state)
     {
         State = state;
     }
