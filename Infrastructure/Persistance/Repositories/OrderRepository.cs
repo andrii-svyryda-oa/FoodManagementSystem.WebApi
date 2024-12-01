@@ -28,6 +28,14 @@ public class OrderRepository(ApplicationDbContext context) : IOrderRepository, I
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Order>> GetAll(CancellationToken cancellationToken)
+    {
+        return await context.Orders
+            .AsNoTracking()
+            .OrderByDescending(x => x.CreatedAt)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<Order> Add(Order order, CancellationToken cancellationToken)
     {
         await context.Orders.AddAsync(order, cancellationToken);

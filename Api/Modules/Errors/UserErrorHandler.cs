@@ -13,7 +13,8 @@ public static class UserErrorHandler
             {
                 UserNotFoundException => StatusCodes.Status404NotFound,
                 UserAlreadyExistsException => StatusCodes.Status409Conflict,
-                UserUnknownException => StatusCodes.Status500InternalServerError,
+                UserUnknownException or 
+                    UserUnknownBalanceHistoryException => StatusCodes.Status500InternalServerError,
                 _ => throw new NotImplementedException("User error handler does not implemented")
             }
         };

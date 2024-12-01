@@ -16,3 +16,6 @@ public class UserAlreadyExistsException(UserId id)
 
 public class UserUnknownException(UserId id, Exception innerException)
     : UserException(id, $"Unknown exception for the User with id: {id}", innerException);
+
+public class UserUnknownBalanceHistoryException(UserId id, Exception innerException)
+    : UserException(id, $"Unknown exception for the User Balance History with id: {id}", innerException);

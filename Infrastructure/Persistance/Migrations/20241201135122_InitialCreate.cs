@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Infrastructure.Migrations
+namespace Infrastructure.Persistance.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration
@@ -67,8 +67,8 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    owner_id = table.Column<Guid>(type: "uuid", nullable: false),
                     name = table.Column<string>(type: "varchar(255)", nullable: false),
+                    owner_id = table.Column<Guid>(type: "uuid", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())"),
                     restaurant_id = table.Column<Guid>(type: "uuid", nullable: false),
                     state = table.Column<string>(type: "varchar(50)", nullable: false)

@@ -1,6 +1,7 @@
 ﻿using Application.Common;
 using Application.Common.Interfaces.Repositories;
 using Application.Users.Exceptions;
+using Domain.BalanceHistories;
 using Domain.Users;
 using MediatR;
 
