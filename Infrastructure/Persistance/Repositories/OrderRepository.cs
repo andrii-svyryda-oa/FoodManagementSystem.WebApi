@@ -14,6 +14,7 @@ public class OrderRepository(ApplicationDbContext context) : IOrderRepository, I
     {
         var entity = await context.Orders
             .Include(x => x.Items)
+            .Include(x => x.Restaurant)
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
@@ -23,6 +24,7 @@ public class OrderRepository(ApplicationDbContext context) : IOrderRepository, I
     public async Task<IReadOnlyList<Order>> GetByUserId(UserId userId, CancellationToken cancellationToken)
     {
         return await context.Orders
+            .Include(x => x.Restaurant)
             .AsNoTracking()
             .Where(x => x.OwnerId == userId)
             .ToListAsync(cancellationToken);
@@ -31,6 +33,7 @@ public class OrderRepository(ApplicationDbContext context) : IOrderRepository, I
     public async Task<IReadOnlyList<Order>> GetAll(CancellationToken cancellationToken)
     {
         return await context.Orders
+            .Include(x => x.Restaurant)
             .AsNoTracking()
             .OrderByDescending(x => x.CreatedAt)
             .ToListAsync(cancellationToken);

@@ -28,7 +28,7 @@ public class CreateUserCommandHandler(
 
         return await existingUser.Match(
             u => Task.FromResult<Result<User, UserException>>(new UserAlreadyExistsException(u.Id)),
-            async () => await CreateEntity(request.Name, request.Email, request.Password, request.Role, cancellationToken));
+            async () => await CreateEntity(request.Name, request.Email, passwordHasher.HashPassword(request.Password), request.Role, cancellationToken));
     }
 
     private async Task<Result<User, UserException>> CreateEntity(
@@ -40,7 +40,7 @@ public class CreateUserCommandHandler(
     {
         try
         {
-            var entity = User.New(UserId.New(), name, email, passwordHasher.HashPassword(password), role);
+            var entity = User.New(UserId.New(), name, email, password, role);
 
             return await userRepository.Add(entity, cancellationToken);
         }

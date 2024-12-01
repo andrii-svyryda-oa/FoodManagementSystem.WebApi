@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using Application.Common;
+using System.Security.Cryptography;
 
 namespace Application.Security;
 
@@ -17,18 +18,23 @@ public class PasswordHasher : IPasswordHasher
         return Convert.ToBase64String(salt) + Delimiter + Convert.ToBase64String(hash);
     }
 
-    public bool VerifyPassword(string password, string hashedPassword)
+    public Result<bool, PasswordHasherException> VerifyPassword(string password, string hashedPassword)
     {
         var parts = hashedPassword.Split(Delimiter);
         if (parts.Length != 2)
-            throw new FormatException("Invalid hash format. Expected 'salt:hash'.");
+            return new PasswordFormatIncorrectException();
 
         var salt = Convert.FromBase64String(parts[0]);
         var hash = Convert.FromBase64String(parts[1]);
 
         var computedHash = Hash(password, salt);
 
-        return CryptographicOperations.FixedTimeEquals(hash, computedHash);
+        if (CryptographicOperations.FixedTimeEquals(hash, computedHash))
+        {
+            return true;
+        }
+        
+        return new PasswordIncorrectException();
     }
 
     private static byte[] GenerateSalt()

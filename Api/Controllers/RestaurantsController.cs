@@ -4,6 +4,7 @@ using Application.Common.Interfaces.Queries;
 using Application.Restaurants.Commands;
 using Domain.Restaurants;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -12,6 +13,7 @@ namespace Api.Controllers;
 [ApiController]
 public class RestaurantsController(ISender sender, IRestaurantQueries restaurantQueries) : ControllerBase
 {
+    [Authorize]
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<RestaurantDto>>> GetAll(CancellationToken cancellationToken)
     {
@@ -20,6 +22,7 @@ public class RestaurantsController(ISender sender, IRestaurantQueries restaurant
         return entities.Select(RestaurantDto.FromDomainModel).ToList();
     }
 
+    [AuthorizeRoles("Admin")]
     [HttpPost]
     public async Task<ActionResult<RestaurantDto>> Create([FromBody] RestaurantDto request, CancellationToken cancellationToken)
     {
@@ -36,6 +39,7 @@ public class RestaurantsController(ISender sender, IRestaurantQueries restaurant
             e => e.ToObjectResult());
     }
 
+    [AuthorizeRoles("Admin")]
     [HttpPut]
     public async Task<ActionResult<RestaurantDto>> Update([FromBody] RestaurantDto request, CancellationToken cancellationToken)
     {
@@ -53,6 +57,7 @@ public class RestaurantsController(ISender sender, IRestaurantQueries restaurant
             e => e.ToObjectResult());
     }
 
+    [AuthorizeRoles("Admin")]
     [HttpDelete("{restaurantId:guid}")]
     public async Task<ActionResult<RestaurantDto>> Delete([FromRoute] Guid restaurantId, CancellationToken cancellationToken)
     {

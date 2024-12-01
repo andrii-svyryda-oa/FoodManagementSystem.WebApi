@@ -5,6 +5,7 @@ using Application.Common.Interfaces.Queries;
 using Application.Users.Commands;
 using Domain.Users;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -13,7 +14,7 @@ namespace Api.Controllers;
 [ApiController]
 public class UsersController(ISender sender, IUserQueries userQueries, IConfiguration configuration) : ControllerBase
 {
-    //[AuthorizeRoles("Admin")]
+    [AuthorizeRoles("Admin")]
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<UserDto>>> GetAll(CancellationToken cancellationToken)
     {
@@ -21,17 +22,7 @@ public class UsersController(ISender sender, IUserQueries userQueries, IConfigur
         return entities.Select(UserDto.FromDomainModel).ToList();
     }
 
-    /*[Authorize]
-    [HttpGet("get-me)]
-    public async Task<ActionResult<UserDto>> Get(CancellationToken cancellationToken)
-    {
-        var entity = await userQueries.GetById(new UserId(userId), cancellationToken);
-        return entity.Match<ActionResult<UserDto>>(
-            u => UserDto.FromDomainModel(u),
-            () => NotFound());
-    }*/
-
-    //[Authorize]
+    [AuthorizeRoles("Admin")]
     [HttpGet("{userId:guid}")]
     public async Task<ActionResult<UserDto>> Get([FromRoute] Guid userId, CancellationToken cancellationToken)
     {
@@ -41,10 +32,11 @@ public class UsersController(ISender sender, IUserQueries userQueries, IConfigur
             () => NotFound());
     }
 
-    /*[HttpPost("register")]
-    public async Task<ActionResult<UserDto>> Register([FromBody] RegisterUserDto request, CancellationToken cancellationToken)
+    [AuthorizeRoles("Admin")]
+    [HttpPost]
+    public async Task<ActionResult<UserDto>> Create([FromBody] CreateUserDto request, CancellationToken cancellationToken)
     {
-        var input = new RegisterUserCommand
+        var input = new CreateUserCommand
         {
             Name = request.Name,
             Email = request.Email,
@@ -57,32 +49,9 @@ public class UsersController(ISender sender, IUserQueries userQueries, IConfigur
         return result.Match<ActionResult<UserDto>>(
             u => UserDto.FromDomainModel(u),
             e => e.ToObjectResult());
-    }*/
+    }
 
-    /*[HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
-    {
-        var user = await userQueries.GetByEmail(request.Email);
-        if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
-        {
-            return Unauthorized("Invalid email or password.");
-        }
-
-        var token = JwtHelper.GenerateJwtToken(user, _configuration);
-
-        // Set JWT token in a cookie
-        Response.Cookies.Append("JwtToken", token, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddMinutes(int.Parse(_configuration["Jwt:ExpireMinutes"]))
-        });
-
-        return Ok(new { Message = "Login successful" });
-    }*/
-
-    //[Authorize]
+    [AuthorizeRoles("Admin")]
     [HttpPut]
     public async Task<ActionResult<UserDto>> Update([FromBody] UpdateUserDto request, CancellationToken cancellationToken)
     {
@@ -100,6 +69,7 @@ public class UsersController(ISender sender, IUserQueries userQueries, IConfigur
             e => e.ToObjectResult());
     }
 
+    [AuthorizeRoles("Admin")]
     [HttpPut("{userId:guid}/update-balance")]
     public async Task<ActionResult<BalanceHistoryDto>> UpdateBalance([FromRoute] Guid userId, [FromBody] AdjustUserBalanceDto request, CancellationToken cancellationToken)
     {
@@ -131,7 +101,7 @@ public class UsersController(ISender sender, IUserQueries userQueries, IConfigur
             e => e.ToObjectResult());
     }
 
-    //[AuthorizeRoles("Admin")]
+    [AuthorizeRoles("Admin")]
     [HttpDelete("{userId:guid}")]
     public async Task<IActionResult> Delete([FromRoute] Guid userId, CancellationToken cancellationToken)
     {

@@ -7,7 +7,7 @@ namespace Api.Dtos;
 public record OrderDto(
     Guid? Id,
     string Name,
-    Guid OwnerId,
+    Guid? OwnerId,
     DateTime? CreatedAt,
     Guid RestaurantId,
     RestaurantDto? Restaurant,

@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Application.Common.Behaviours;
 using Application.Security;
+using Application.Security.JwtHelper;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,5 +16,6 @@ public static class ConfigureApplication
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
         services.AddSingleton(typeof(IPasswordHasher), typeof(PasswordHasher));
+        services.AddSingleton(typeof(IJwtService), typeof(JwtService));
     }
 }

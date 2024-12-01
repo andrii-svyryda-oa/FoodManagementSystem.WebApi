@@ -1,4 +1,6 @@
-﻿using Domain.Orders;
+﻿using Application.OrderItems.Exceptions;
+using Domain.OrderItems;
+using Domain.Orders;
 using Domain.Restaurants;
 using Domain.Users;
 
@@ -21,3 +23,9 @@ public class OrderRestaurantNotFoundException(RestaurantId restaurantId)
 
 public class OrderUnknownException(OrderId id, Exception innerException)
     : OrderException(id, $"Unknown exception for the Order with id: {id}", innerException);
+
+public class OrderOperationForbiddenException(OrderId id)
+    : OrderException(id, $"Operation for Order with id: {id} is forbidden");
+
+public class OrderAuthorNotFoundException(UserId id)
+    : OrderException(OrderId.Empty(), $"Author with id: {id} not found");

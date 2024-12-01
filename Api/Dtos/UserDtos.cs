@@ -20,7 +20,7 @@ public record UserDto(
             Balance: user.Balance);
 }
 
-public record RegisterUserDto(
+public record CreateUserDto(
     string Name,
     string Email,
     string Password,

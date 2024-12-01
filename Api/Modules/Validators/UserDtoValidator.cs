@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Api.Modules.Validators;
 
-public class UserDtoValidator : AbstractValidator<RegisterUserDto>
+public class UserDtoValidator : AbstractValidator<CreateUserDto>
 {
     public UserDtoValidator()
     {

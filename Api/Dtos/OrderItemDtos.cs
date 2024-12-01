@@ -7,7 +7,7 @@ public record OrderItemDto(
     string Name,
     decimal Price,
     Guid UserId,
-    Guid OrderId,
+    Guid? OrderId,
     DateTime? CreatedAt)
 {
     public static OrderItemDto FromDomainModel(OrderItem orderItem)

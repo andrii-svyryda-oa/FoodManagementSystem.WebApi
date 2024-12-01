@@ -1,7 +1,10 @@
-﻿namespace Application.Security;
+﻿using Application.Common;
+using Optional;
+
+namespace Application.Security;
 
 public interface IPasswordHasher
 {
     string HashPassword(string password);
-    bool VerifyPassword(string password, string hashedPassword);
+    Result<bool, PasswordHasherException> VerifyPassword(string password, string hashedPassword);
 }

@@ -13,6 +13,12 @@ public abstract class OrderItemException(OrderItemId id, string message, Excepti
 public class OrderItemNotFoundException(OrderItemId id)
     : OrderItemException(id, $"OrderItem with id: {id} not found");
 
+public class OrderItemOperationForbiddenException(OrderItemId id)
+    : OrderItemException(id, $"Operation for OrderItem with id: {id} is forbidden");
+
+public class OrderItemAuthorNotFoundException(UserId id)
+    : OrderItemException(OrderItemId.Empty(), $"Author with id: {id} not found");
+
 public class OrderItemOrderNotFoundException(OrderId id)
     : OrderItemException(OrderItemId.Empty(), $"Order with id: {id} not found");
 
