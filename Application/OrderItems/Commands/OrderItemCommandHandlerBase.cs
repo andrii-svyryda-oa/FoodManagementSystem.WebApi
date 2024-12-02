@@ -1,6 +1,7 @@
 ﻿using Application.Common;
 using Application.Common.Interfaces.Repositories;
 using Application.OrderItems.Exceptions;
+using Application.Orders.Exceptions;
 using Domain.OrderItems;
 using Domain.Orders;
 using Domain.Users;
@@ -22,21 +23,24 @@ public class OrderItemCommandHandlerBase(
         return await orderItem.Match(
             async orderItem =>
             {
+                var order = orderItem.Order!;
                 var author = await userRepository.GetById(authorId, cancellationToken);
 
                 return author.Match<Result<OrderItem, OrderItemException>>(
                     author => {
-                        if (author.Role == UserRole.Admin)
+                        var userHasAccess = author.Role == UserRole.Admin || author.Id == order.OwnerId;
+
+                        if (!userHasAccess)
                         {
-                            return orderItem;
+                            return new OrderItemOperationForbiddenException(orderItem.Id);
                         }
 
-                        if (author.Id == orderItem.UserId)
+                        if (order.State == OrderState.Closed)
                         {
-                            return orderItem;
+                            return new OrderItemOrderAlreadyClosedException(orderItem.Id);
                         }
 
-                        return new OrderItemOperationForbiddenException(orderItemId);
+                        return orderItem;
                     },
                     () => new OrderItemAuthorNotFoundException(authorId));
             },

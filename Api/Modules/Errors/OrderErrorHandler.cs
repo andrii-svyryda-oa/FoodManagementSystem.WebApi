@@ -19,6 +19,7 @@ public static class OrderErrorHandler
                     OrderOwnerNotFoundException => StatusCodes.Status404NotFound,
                 OrderAuthorNotFoundException or
                     OrderOperationForbiddenException => StatusCodes.Status403Forbidden,
+                OrderAlreadyClosedException => StatusCodes.Status405MethodNotAllowed,
                 OrderUnknownException => StatusCodes.Status500InternalServerError,
                 _ => throw new NotImplementedException("User error handler does not implemented")
             }

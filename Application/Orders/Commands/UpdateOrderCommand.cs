@@ -29,9 +29,8 @@ public class UpdateOrderCommandHandler(
 
         var existingOrder = await ReadDbOrder(orderId, userId, cancellationToken);
 
-        return await existingOrder.MatchAsync(
-            async o => await UpdateEntity(o, request.Name, request.State, cancellationToken),
-            e => e);
+        return await existingOrder.BindAsync(
+            async o => await UpdateEntity(o, request.Name, request.State, cancellationToken));
     }
 
     private async Task<Result<Order, OrderException>> UpdateEntity(

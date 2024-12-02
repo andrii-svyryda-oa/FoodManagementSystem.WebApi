@@ -34,4 +34,21 @@ public readonly struct Result<TValue, TError>
         Func<TValue, Task<TResult>> success,
         Func<TError, TResult> failure) =>
         IsSuccess ? await success(_value!) : failure(_error!);
+
+    public Result<TNextValue, TError> Bind<TNextValue>(
+        Func<TValue, Result<TNextValue, TError>> func)
+    {
+        return Match(func, f => f);
+    }
+
+    public async Task<Result<TNextValue, TError>> BindAsync<TNextValue>(
+        Func<TValue, Task<Result<TNextValue, TError>>> func)
+    {
+        return await MatchAsync(func, f => f);
+    }
+
+    public Result<TNextValue, TError> Map<TNextValue>(Func<TValue, TNextValue> func)
+    {
+        return IsSuccess ? new Result<TNextValue, TError>(func(_value!)) : new Result<TNextValue, TError>(_error!);
+    }
 }

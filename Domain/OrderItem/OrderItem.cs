@@ -11,6 +11,7 @@ public class OrderItem
     public UserId UserId { get; }
     public OrderId OrderId { get; }
     public DateTime CreatedAt { get; private set; }
+    public Order? Order { get; private set; }
 
     private OrderItem(OrderItemId id, string name, decimal price, UserId userId, OrderId orderId, DateTime createdAt)
     {

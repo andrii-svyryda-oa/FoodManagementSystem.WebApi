@@ -27,10 +27,34 @@ public class OrdersController(ISender sender, IOrderQueries orderQueries) : Cont
     public async Task<ActionResult<OrderDto>> Get([FromRoute] Guid orderId, CancellationToken cancellationToken)
     {
         var entity = await orderQueries.GetById(new OrderId(orderId), cancellationToken);
-        
+
         return entity.Match<ActionResult<OrderDto>>(
             o => OrderDto.FromDomainModel(o),
             () => NotFound());
+    }
+
+    [Authorize]
+    [HttpPost("{orderId:guid}/close")]
+    public async Task<ActionResult<OrderDto>> CloseOrder([FromRoute] Guid orderId, CancellationToken cancellationToken)
+    {
+        var userId = this.GetUserIdFromClaims();
+
+        return await userId.Match<Task<ActionResult<OrderDto>>>(
+            async userId =>
+            {
+                var input = new CloseOrderCommand
+                {
+                    OrderId = orderId,
+                    AuthorId = userId
+                };
+
+                var result = await sender.Send<Application.Common.Result<Order, Application.Orders.Exceptions.OrderException>>(input, cancellationToken);
+
+                return result.Match<ActionResult<OrderDto>>(
+                    o => OrderDto.FromDomainModel(o),
+                    e => e.ToObjectResult());
+            },
+            () => Task.FromResult<ActionResult<OrderDto>>(base.Unauthorized()));
     }
 
     [Authorize]

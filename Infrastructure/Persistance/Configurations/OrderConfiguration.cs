@@ -15,6 +15,7 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
 
         builder.Property(x => x.Name).IsRequired().HasColumnType("varchar(255)");
         builder.Property(x => x.CreatedAt).HasDefaultValueSql("timezone('utc', now())");
+        builder.Ignore(x => x.CloseOrderBillName);
 
         builder.Property(x => x.State)
             .IsRequired()

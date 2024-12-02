@@ -20,6 +20,7 @@ public class OrderItemRepository(ApplicationDbContext context) : IOrderItemRepos
     public async Task<Option<OrderItem>> GetById(OrderItemId id, CancellationToken cancellationToken)
     {
         var entity = await context.OrderItems
+            .Include(x => x.Order)
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 

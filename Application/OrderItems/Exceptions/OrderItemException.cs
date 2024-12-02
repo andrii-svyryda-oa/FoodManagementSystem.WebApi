@@ -13,6 +13,9 @@ public abstract class OrderItemException(OrderItemId id, string message, Excepti
 public class OrderItemNotFoundException(OrderItemId id)
     : OrderItemException(id, $"OrderItem with id: {id} not found");
 
+public class OrderItemOrderAlreadyClosedException(OrderItemId id)
+    : OrderItemException(id, $"OrderItem with id: {id} operation now allowed cause order is already closed");
+
 public class OrderItemOperationForbiddenException(OrderItemId id)
     : OrderItemException(id, $"Operation for OrderItem with id: {id} is forbidden");
 

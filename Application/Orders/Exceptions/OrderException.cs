@@ -15,6 +15,9 @@ public abstract class OrderException(OrderId id, string message, Exception? inne
 public class OrderNotFoundException(OrderId id)
     : OrderException(id, $"Order with id: {id} not found");
 
+public class OrderAlreadyClosedException(OrderId id)
+    : OrderException(id, $"Order with id: {id} is already closed");
+
 public class OrderOwnerNotFoundException(UserId ownerId)
     : OrderException(OrderId.Empty(), $"Customer with id: {ownerId} not found");
 

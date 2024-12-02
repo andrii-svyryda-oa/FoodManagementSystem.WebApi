@@ -21,4 +21,9 @@ public class BalanceHistory
 
     public static BalanceHistory New(BalanceHistoryId id, UserId userId, string reason, decimal difference)
         => new(id, userId, reason, difference, DateTime.UtcNow);
+
+    public void SubstractFromDifference(decimal difference)
+    {
+        Difference -= difference;
+    }
 }

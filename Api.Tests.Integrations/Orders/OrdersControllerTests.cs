@@ -1,6 +1,8 @@
-﻿using System.Net.Http.Json;
+﻿using System.Net;
+using System.Net.Http.Json;
 using Api.Dtos;
 using Docker.DotNet.Models;
+using Domain.OrderItems;
 using Domain.Orders;
 using Domain.Restaurants;
 using Domain.Users;
@@ -148,6 +150,78 @@ public class OrdersControllerTests : BaseIntegrationTest, IAsyncLifetime
 
         var orderExists = await Context.Orders.AnyAsync(x => x.Id == testOrder.Id);
         orderExists.Should().BeFalse();
+    }
+
+
+    [Fact]
+    public async Task ShouldCloseOrderSuccessfully()
+    {
+        // Arrange
+        var order = OrdersData.SecondaryOrder(_mainRestaurant.Id, _mainUser.Id, "1");
+        var testUser1 = UsersData.SecondaryUser("1");
+        var testUser2 = UsersData.SecondaryUser("2");
+
+        var orderItem1 = OrderItemsData.SecondaryOrderItem(order.Id, testUser1.Id, 100);
+        var orderItem2 = OrderItemsData.SecondaryOrderItem(order.Id, testUser1.Id, 150);
+        var orderItem3 = OrderItemsData.SecondaryOrderItem(order.Id, testUser2.Id, 400);
+
+        await Context.Users.AddRangeAsync(testUser1, testUser2);
+        await Context.OrderItems.AddRangeAsync(orderItem1, orderItem2, orderItem3);
+        await SaveChangesAsync();
+
+        // Act
+        var response = await Client.PostAsync($"orders/{order.Id.Value}/close", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var responseContent = await response.Content.ReadFromJsonAsync<OrderDto>();
+        responseContent.Should().NotBeNull();
+        responseContent!.State.Should().Be(OrderState.Closed);
+
+        // Verify order state in the database
+        var dbOrder = await Context.Orders.FirstAsync(o => o.Id == order.Id);
+        dbOrder.State.Should().Be(OrderState.Closed);
+
+        // Verify balances are updated
+        var dbUser1 = await Context.Users.FirstAsync(u => u.Id == testUser1.Id);
+        dbUser1.Balance.Should().Be(-350m);
+
+        var dbUser2 = await Context.Users.FirstAsync(u => u.Id == testUser2.Id);
+        dbUser2.Balance.Should().Be(-400m);
+
+        // Verify balance history records
+        var balanceHistories = await Context.BalanceHistory.ToListAsync();
+        balanceHistories.Should().HaveCount(2);
+
+        var user1History = balanceHistories.FirstOrDefault(h => h.UserId == testUser1.Id);
+        user1History.Should().NotBeNull();
+        user1History!.Details.Should().Be(order.CloseOrderBillName);
+        user1History.Difference.Should().Be(-350m);
+
+        var user2History = balanceHistories.FirstOrDefault(h => h.UserId == testUser1.Id);
+        user2History.Should().NotBeNull();
+        user2History!.Details.Should().Be(order.CloseOrderBillName);
+        user2History.Difference.Should().Be(-400m);
+    }
+
+    [Fact]
+    public async Task ShouldFailToCloseAlreadyClosedOrder()
+    {
+        // Arrange
+        var order = OrdersData.SecondaryOrder(_mainRestaurant.Id, _mainUser.Id, "2");
+        order.UpdateDetails(order.Name, OrderState.Closed);
+        await SaveChangesAsync();
+
+        SetTestUser(_mainUser.Id.Value.ToString(), "user");
+
+        // Act
+        var response = await Client.PostAsync($"orders/{order.Id.Value}/close", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.MethodNotAllowed);
+        var responseContent = await response.Content.ReadAsStringAsync();
+        responseContent.Should().Contain($"Order with ID '{order.Id.Value}' is already closed.");
     }
 
     public async Task InitializeAsync()

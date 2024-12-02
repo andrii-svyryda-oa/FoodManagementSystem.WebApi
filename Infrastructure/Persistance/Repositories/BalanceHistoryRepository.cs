@@ -23,4 +23,11 @@ public class BalanceHistoryRepository(ApplicationDbContext context) : IBalanceHi
         await context.SaveChangesAsync(cancellationToken);
         return balanceHistory;
     }
+
+    public async Task<List<BalanceHistory>> AddMany(List<BalanceHistory> balanceHistories, CancellationToken cancellationToken)
+    {
+        await context.BalanceHistory.AddRangeAsync(balanceHistories);
+        await context.SaveChangesAsync(cancellationToken);
+        return balanceHistories;
+    }
 }

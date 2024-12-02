@@ -27,9 +27,8 @@ public class DeleteOrderItemCommandHandler(
 
         var existingOrderItem = await ReadDbOrderItem(orderItemId, authorId, cancellationToken);
 
-        return await existingOrderItem.MatchAsync(
-            async oi => await DeleteEntity(oi, cancellationToken),
-            e => e);
+        return await existingOrderItem.BindAsync(
+            async oi => await DeleteEntity(oi, cancellationToken));
     }
 
     public async Task<Result<OrderItem, OrderItemException>> DeleteEntity(OrderItem orderItem, CancellationToken cancellationToken)

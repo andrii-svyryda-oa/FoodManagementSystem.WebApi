@@ -27,17 +27,19 @@ public class OrderCommandHandlerBase(
 
                 return author.Match<Result<Order, OrderException>>(
                     author => {
-                        if (author.Role == UserRole.Admin)
+                        var userHasAccess = author.Role == UserRole.Admin || author.Id == order.OwnerId;
+                        
+                        if (!userHasAccess)
                         {
-                            return order;
+                            return new OrderOperationForbiddenException(orderId);
                         }
 
-                        if (author.Id == order.OwnerId)
+                        if (order.State == OrderState.Closed)
                         {
-                            return order;
+                            return new OrderAlreadyClosedException(orderId);
                         }
 
-                        return new OrderOperationForbiddenException(orderId);
+                        return order;
                     },
                     () => new OrderAuthorNotFoundException(authorId));
             },

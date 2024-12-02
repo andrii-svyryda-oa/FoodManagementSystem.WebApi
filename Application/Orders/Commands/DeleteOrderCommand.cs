@@ -26,11 +26,10 @@ public class DeleteOrderCommandHandler(
         var orderId = new OrderId(request.OrderId);
         var authorId = new UserId(request.AuthorId);
 
-        var existingOrder = await this.ReadDbOrder(orderId, authorId, cancellationToken);
+        var existingOrder = await ReadDbOrder(orderId, authorId, cancellationToken);
 
-        return await existingOrder.MatchAsync(
-            async o => await DeleteEntity(o, cancellationToken),
-            e => e);
+        return await existingOrder.BindAsync(
+            async o => await DeleteEntity(o, cancellationToken));
     }
 
     public async Task<Result<Order, OrderException>> DeleteEntity(Order order, CancellationToken cancellationToken)

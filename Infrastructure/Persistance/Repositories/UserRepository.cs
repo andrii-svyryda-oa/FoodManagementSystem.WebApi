@@ -17,6 +17,17 @@ public class UserRepository(ApplicationDbContext context) : IUserRepository, IUs
         return entity == null ? Option.None<User>() : Option.Some(entity);
     }
 
+
+    public async Task<List<User>> GetByIds(List<UserId> ids, CancellationToken cancellationToken)
+    {
+        var entities = await context.Users
+            .AsNoTracking()
+            .Where(x => ids.Contains(x.Id))
+            .ToListAsync(cancellationToken);
+
+        return entities;
+    }
+
     public async Task<IReadOnlyList<User>> GetAll(CancellationToken cancellationToken)
     {
         return await context.Users
@@ -38,6 +49,13 @@ public class UserRepository(ApplicationDbContext context) : IUserRepository, IUs
         await context.Users.AddAsync(user, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
         return user;
+    }
+
+    public async Task<List<User>> UpdateMany(List<User> users, CancellationToken cancellationToken)
+    {
+        context.Users.UpdateRange(users);
+        await context.SaveChangesAsync(cancellationToken);
+        return users;
     }
 
     public async Task<User> Update(User user, CancellationToken cancellationToken)
