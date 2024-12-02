@@ -15,7 +15,7 @@ public class Order
     public OrderState State { get; private set; }
     public List<OrderItem>? Items { get; private set; }
 
-    public string CloseOrderBillName { get => $"Bill for {Name} at {Restaurant!.Name}"; }
+    public string CloseOrderBillName { get => $"Bill for {Name} at {Restaurant?.Name ?? ""}"; }
 
     private Order(OrderId id, UserId ownerId, string name, RestaurantId restaurantId, OrderState state, DateTime createdAt)
     {

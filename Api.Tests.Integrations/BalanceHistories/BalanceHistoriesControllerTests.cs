@@ -43,6 +43,7 @@ public class BalanceHistoryControllerTests : BaseIntegrationTest, IAsyncLifetime
     public async Task InitializeAsync()
     {
         SetTestUser(_mainUser.Id.ToString(), _mainUser.Role.ToString());
+
         await Context.Users.AddAsync(_mainUser);
         await Context.BalanceHistory.AddAsync(_mainBalanceHistory);
         await SaveChangesAsync();

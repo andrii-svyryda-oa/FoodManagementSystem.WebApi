@@ -1,7 +1,9 @@
 ﻿using Api.Dtos;
 using Api.Modules.Errors;
+using Application.Common;
 using Application.Common.Interfaces.Queries;
 using Application.Orders.Commands;
+using Application.Orders.Exceptions;
 using Domain.Orders;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -48,7 +50,7 @@ public class OrdersController(ISender sender, IOrderQueries orderQueries) : Cont
                     AuthorId = userId
                 };
 
-                var result = await sender.Send<Application.Common.Result<Order, Application.Orders.Exceptions.OrderException>>(input, cancellationToken);
+                var result = await sender.Send<Result<Order, OrderException>>(input, cancellationToken);
 
                 return result.Match<ActionResult<OrderDto>>(
                     o => OrderDto.FromDomainModel(o),

@@ -21,8 +21,6 @@ public class UsersControllerTests : BaseIntegrationTest, IAsyncLifetime
     public async Task ShouldGetAllUsers()
     {
         // Arrange
-        SetTestUser(_mainUser.Id.ToString(), _mainUser.Role.ToString());
-
         // Act
         var response = await Client.GetAsync("users");
 
@@ -42,8 +40,6 @@ public class UsersControllerTests : BaseIntegrationTest, IAsyncLifetime
     public async Task ShouldGetUserById()
     {
         // Arrange
-        SetTestUser(_mainUser.Id.ToString(), _mainUser.Role.ToString());
-
         var userId = _mainUser.Id.Value;
 
         // Act
@@ -63,8 +59,6 @@ public class UsersControllerTests : BaseIntegrationTest, IAsyncLifetime
     public async Task ShouldCreateUser()
     {
         // Arrange
-        SetTestUser(_mainUser.Id.ToString(), _mainUser.Role.ToString());
-
         var createdName = "Created User Name";
         var createdEmail = "created@example.com";
         var request = new CreateUserDto(createdName, createdEmail, "Password123", UserRole.User);
@@ -87,8 +81,6 @@ public class UsersControllerTests : BaseIntegrationTest, IAsyncLifetime
     public async Task ShouldUpdateUser()
     {
         // Arrange
-        SetTestUser(_mainUser.Id.ToString(), _mainUser.Role.ToString());
-
         var updatedName = "Updated User Name";
         var updatedEmail = "updated@example.com";
         var request = new UpdateUserDto(_mainUser.Id.Value, updatedName, updatedEmail);
@@ -108,8 +100,6 @@ public class UsersControllerTests : BaseIntegrationTest, IAsyncLifetime
     public async Task ShouldUpdateUserBalanceAndCreateBalanceHistory()
     {
         // Arrange
-        SetTestUser(_mainUser.Id.ToString(), _mainUser.Role.ToString());
-
         var difference = 1000m;
         var details = "Test Balance Update";
         var request = new AdjustUserBalanceDto(details, difference);
@@ -135,8 +125,6 @@ public class UsersControllerTests : BaseIntegrationTest, IAsyncLifetime
     public async Task ShouldDeleteUser()
     {
         // Arrange
-        SetTestUser(_mainUser.Id.ToString(), _mainUser.Role.ToString());
-
         var testUser = User.New(UserId.New(), "delete test user", "delete@example.com", "passwd", UserRole.Admin);
         await Context.Users.AddAsync(testUser);
         await SaveChangesAsync();
@@ -154,6 +142,8 @@ public class UsersControllerTests : BaseIntegrationTest, IAsyncLifetime
 
     public async Task InitializeAsync()
     {
+        SetTestUser(_mainUser.Id.ToString(), _mainUser.Role.ToString());
+
         await Context.Users.AddAsync(_mainUser);
         await SaveChangesAsync();
     }

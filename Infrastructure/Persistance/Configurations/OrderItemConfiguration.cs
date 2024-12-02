@@ -23,7 +23,7 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
             .HasConstraintName("fk_order_positions_users_id")
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne<Order>()
+        builder.HasOne(x => x.Order)
             .WithMany(x => x.Items)
             .HasForeignKey(x => x.OrderId)
             .HasConstraintName("fk_order_positions_orders_id")

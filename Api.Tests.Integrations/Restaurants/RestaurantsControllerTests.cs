@@ -11,10 +11,12 @@ namespace Api.Tests.Integration.Restaurants;
 
 public class RestaurantsControllerTests : BaseIntegrationTest, IAsyncLifetime
 {
+    private readonly User _mainUser;
     private readonly Restaurant _mainRestaurant;
 
     public RestaurantsControllerTests(IntegrationTestWebFactory factory) : base(factory)
     {
+        _mainUser = UsersData.MainUser("TestPassword123!");
         _mainRestaurant = RestaurantsData.MainRestaurant();
     }
 
@@ -87,13 +89,6 @@ public class RestaurantsControllerTests : BaseIntegrationTest, IAsyncLifetime
     public async Task ShouldDeleteRestaurant()
     {
         // Arrange
-        var testUser = User.New(UserId.New(), "delete test user", "delete@example.com", "passwd", UserRole.Admin);
-        await Context.Users.AddAsync(testUser);
-        await SaveChangesAsync();
-        var userId = testUser.Id.Value;
-
-
-        // Arrange
         var testRestaurant = Restaurant.New(RestaurantId.New(), "Delete restaurant test", "delete test");
         await Context.Restaurants.AddAsync(testRestaurant);
         await SaveChangesAsync();
@@ -111,12 +106,16 @@ public class RestaurantsControllerTests : BaseIntegrationTest, IAsyncLifetime
 
     public async Task InitializeAsync()
     {
+        SetTestUser(_mainUser.Id.ToString(), _mainUser.Role.ToString());
+
+        await Context.Users.AddAsync(_mainUser);
         await Context.Restaurants.AddAsync(_mainRestaurant);
         await SaveChangesAsync();
     }
 
     public async Task DisposeAsync()
     {
+        Context.Users.RemoveRange(Context.Users);
         Context.Restaurants.RemoveRange(Context.Restaurants);
         await SaveChangesAsync();
     }

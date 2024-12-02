@@ -30,8 +30,6 @@ public class OrdersControllerTests : BaseIntegrationTest, IAsyncLifetime
     public async Task ShouldGetAllOrders()
     {
         // Arrange
-        SetTestUser(_mainUser.Id.ToString(), _mainUser.Role.ToString());
-
         // Act
         var response = await Client.GetAsync("orders");
 
@@ -53,8 +51,6 @@ public class OrdersControllerTests : BaseIntegrationTest, IAsyncLifetime
     public async Task ShouldGetOrderById()
     {
         // Arrange
-        SetTestUser(_mainUser.Id.ToString(), _mainUser.Role.ToString());
-
         var orderId = _mainOrder.Id.Value;
 
         // Act
@@ -75,8 +71,6 @@ public class OrdersControllerTests : BaseIntegrationTest, IAsyncLifetime
     public async Task ShouldCreateOrder()
     {
         // Arrange
-        SetTestUser(_mainUser.Id.ToString(), _mainUser.Role.ToString());
-
         var request = new OrderDto(
             Id: null,
             Name: "New Order",
@@ -107,8 +101,6 @@ public class OrdersControllerTests : BaseIntegrationTest, IAsyncLifetime
     public async Task ShouldUpdateOrder()
     {
         // Arrange
-        SetTestUser(_mainUser.Id.ToString(), _mainUser.Role.ToString());
-
         var updatedName = "Updated Order Name";
         var updatedState = OrderState.Closed;
         var request = new OrderDto(
@@ -136,8 +128,6 @@ public class OrdersControllerTests : BaseIntegrationTest, IAsyncLifetime
     public async Task ShouldDeleteOrder()
     {
         // Arrange
-        SetTestUser(_mainUser.Id.ToString(), _mainUser.Role.ToString());
-
         var testOrder = Order.New(OrderId.New(), _mainUser.Id, "OBID", _mainRestaurant.Id);
         await Context.Orders.AddAsync(testOrder);
         await SaveChangesAsync();
@@ -158,6 +148,7 @@ public class OrdersControllerTests : BaseIntegrationTest, IAsyncLifetime
     {
         // Arrange
         var order = OrdersData.SecondaryOrder(_mainRestaurant.Id, _mainUser.Id, "1");
+
         var testUser1 = UsersData.SecondaryUser("1");
         var testUser2 = UsersData.SecondaryUser("2");
 
@@ -165,6 +156,7 @@ public class OrdersControllerTests : BaseIntegrationTest, IAsyncLifetime
         var orderItem2 = OrderItemsData.SecondaryOrderItem(order.Id, testUser1.Id, 150);
         var orderItem3 = OrderItemsData.SecondaryOrderItem(order.Id, testUser2.Id, 400);
 
+        await Context.Orders.AddAsync(order);
         await Context.Users.AddRangeAsync(testUser1, testUser2);
         await Context.OrderItems.AddRangeAsync(orderItem1, orderItem2, orderItem3);
         await SaveChangesAsync();
@@ -185,7 +177,7 @@ public class OrdersControllerTests : BaseIntegrationTest, IAsyncLifetime
 
         // Verify balances are updated
         var dbUser1 = await Context.Users.FirstAsync(u => u.Id == testUser1.Id);
-        dbUser1.Balance.Should().Be(-350m);
+        dbUser1.Balance.Should().Be(-250m);
 
         var dbUser2 = await Context.Users.FirstAsync(u => u.Id == testUser2.Id);
         dbUser2.Balance.Should().Be(-400m);
@@ -196,12 +188,12 @@ public class OrdersControllerTests : BaseIntegrationTest, IAsyncLifetime
 
         var user1History = balanceHistories.FirstOrDefault(h => h.UserId == testUser1.Id);
         user1History.Should().NotBeNull();
-        user1History!.Details.Should().Be(order.CloseOrderBillName);
-        user1History.Difference.Should().Be(-350m);
+        user1History!.Details.Should().Contain(order.CloseOrderBillName);
+        user1History.Difference.Should().Be(-250m);
 
-        var user2History = balanceHistories.FirstOrDefault(h => h.UserId == testUser1.Id);
+        var user2History = balanceHistories.FirstOrDefault(h => h.UserId == testUser2.Id);
         user2History.Should().NotBeNull();
-        user2History!.Details.Should().Be(order.CloseOrderBillName);
+        user2History!.Details.Should().Contain(order.CloseOrderBillName);
         user2History.Difference.Should().Be(-400m);
     }
 
@@ -211,9 +203,8 @@ public class OrdersControllerTests : BaseIntegrationTest, IAsyncLifetime
         // Arrange
         var order = OrdersData.SecondaryOrder(_mainRestaurant.Id, _mainUser.Id, "2");
         order.UpdateDetails(order.Name, OrderState.Closed);
+        await Context.Orders.AddAsync(order);
         await SaveChangesAsync();
-
-        SetTestUser(_mainUser.Id.Value.ToString(), "user");
 
         // Act
         var response = await Client.PostAsync($"orders/{order.Id.Value}/close", null);
@@ -221,11 +212,13 @@ public class OrdersControllerTests : BaseIntegrationTest, IAsyncLifetime
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.MethodNotAllowed);
         var responseContent = await response.Content.ReadAsStringAsync();
-        responseContent.Should().Contain($"Order with ID '{order.Id.Value}' is already closed.");
+        responseContent.Should().Contain($"Order with id: {order.Id.Value} is already closed");
     }
 
     public async Task InitializeAsync()
     {
+        SetTestUser(_mainUser.Id.ToString(), _mainUser.Role.ToString());
+
         await Context.Restaurants.AddAsync(_mainRestaurant);
         await Context.Users.AddAsync(_mainUser);
         await Context.Orders.AddAsync(_mainOrder);

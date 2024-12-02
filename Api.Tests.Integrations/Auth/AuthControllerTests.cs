@@ -74,9 +74,6 @@ public class AuthControllerTests : BaseIntegrationTest, IAsyncLifetime
     [Fact]
     public async Task ShouldRetrieveUserInfoSuccessfully()
     {
-        // Authenticate the user
-        SetTestUser(_mainUser.Id.Value.ToString(), "Admin");
-
         // Act
         var response = await Client.GetAsync("auth/user-info");
 
@@ -92,11 +89,8 @@ public class AuthControllerTests : BaseIntegrationTest, IAsyncLifetime
     [Fact]
     public async Task ShouldReturnUnauthorizedForUserInfoWithoutAuthentication()
     {
-        // Unauthenticate the user
-        ResetUser();
-
         // Act
-        var response = await Client.GetAsync("auth/user-info");
+        var response = await SendUnauthorizedRequest(HttpMethod.Get, "auth/user-info");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -104,6 +98,8 @@ public class AuthControllerTests : BaseIntegrationTest, IAsyncLifetime
 
     public async Task InitializeAsync()
     {
+        SetTestUser(_mainUser.Id.ToString(), _mainUser.Role.ToString());
+
         await Context.Users.AddAsync(_mainUser);
         await SaveChangesAsync();
     }

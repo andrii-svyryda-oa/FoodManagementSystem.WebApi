@@ -1,7 +1,10 @@
 ﻿using System.Data;
 using System.Net.Http.Headers;
 using System.Security.Claims;
+using System.Text;
 using System.Text.Encodings.Web;
+using System.Text.Json;
+using Domain.Orders;
 using Domain.Users;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication;
@@ -10,6 +13,9 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
+using Microsoft.VisualStudio.TestPlatform.Common;
+using Optional.Collections;
 using Xunit;
 
 namespace Tests.Common;
@@ -38,8 +44,25 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebFact
         {
             AllowAutoRedirect = false,
         });
+    }
 
-        SetTestUser();
+    protected async Task<HttpResponseMessage> SendUnauthorizedRequest(HttpMethod method, string route, object? data = null)
+    {
+        var request = new HttpRequestMessage(method, route);
+
+        if (data != null)
+        {
+            var jsonData = JsonSerializer.Serialize(data);
+
+            var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+            request.Content = content;
+        }
+
+        request.Headers.Add("x-name-identifier", "");
+        request.Headers.Add("x-role", "");
+
+        return await Client.SendAsync(request);
     }
 
     protected void SetTestUser(string userId = "Admin", string role = "Admin")
@@ -47,19 +70,8 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebFact
         Client.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue(scheme: "TestScheme");
 
-        TestAuthHandler.Claims = new[]
-        {
-            new Claim(ClaimTypes.Role, role),
-            new Claim(ClaimTypes.NameIdentifier, userId)
-        };
-    }
-
-    protected void ResetUser()
-    {
-        Client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue(scheme: "TestScheme");
-
-        TestAuthHandler.Claims = Array.Empty<Claim>();
+        Client.DefaultRequestHeaders.Add("x-name-identifier", userId);
+        Client.DefaultRequestHeaders.Add("x-role", role);
     }
 
     protected async Task<int> SaveChangesAsync()
@@ -81,7 +93,19 @@ public class TestAuthHandler(
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var identity = new ClaimsIdentity(Claims, "Test");
+        var claims = new List<Claim>();
+
+        if (Request.Headers.TryGetValue("x-name-identifier", out StringValues nameIdentifiers))
+        {
+            nameIdentifiers.FirstOrNone().MatchSome(nameIdentifier => claims.Add(new Claim(ClaimTypes.NameIdentifier, nameIdentifier!)));
+        }
+
+        if (Request.Headers.TryGetValue("x-role", out StringValues roles))
+        {
+            roles.FirstOrNone().MatchSome(role => claims.Add(new Claim(ClaimTypes.Role, role!)));
+        }
+
+        var identity = new ClaimsIdentity(claims, "Test");
         var principal = new ClaimsPrincipal(identity);
         var ticket = new AuthenticationTicket(principal, "TestScheme");
 

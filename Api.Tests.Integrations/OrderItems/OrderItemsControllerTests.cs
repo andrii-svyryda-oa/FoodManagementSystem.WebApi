@@ -29,9 +29,6 @@ public class OrderItemsControllerTests : BaseIntegrationTest, IAsyncLifetime
     [Fact]
     public async Task ShouldGetOrderItemsByOrderId()
     {
-        // Arrange
-        SetTestUser(_mainUser.Id.ToString(), _mainUser.Role.ToString());
-
         // Act
         var response = await Client.GetAsync($"order-items/order/{_mainOrder.Id.Value}");
 
@@ -53,7 +50,6 @@ public class OrderItemsControllerTests : BaseIntegrationTest, IAsyncLifetime
     public async Task ShouldCreateOrderItem()
     {
         // Arrange
-        SetTestUser(_mainUser.Id.ToString(), _mainUser.Role.ToString());
         var request = new OrderItemDto(
             Id: null,
             Name: "New Item",
@@ -82,7 +78,6 @@ public class OrderItemsControllerTests : BaseIntegrationTest, IAsyncLifetime
     public async Task ShouldDeleteOrderItem()
     {
         // Arrange
-        SetTestUser(_mainUser.Id.ToString(), _mainUser.Role.ToString());
         var orderItem = OrderItem.New(OrderItemId.New(), "Test item", 100, _mainUser.Id, _mainOrder.Id);
         await Context.OrderItems.AddAsync(orderItem);
         await SaveChangesAsync();
@@ -101,7 +96,6 @@ public class OrderItemsControllerTests : BaseIntegrationTest, IAsyncLifetime
     public async Task ShouldUpdateOrderItem()
     {
         // Arrange
-        SetTestUser(_mainUser.Id.ToString(), _mainUser.Role.ToString());
         var updatedName = "Updated Item Name";
         var updatedPrice = 199.99m;
         var request = new OrderItemDto(
@@ -125,6 +119,8 @@ public class OrderItemsControllerTests : BaseIntegrationTest, IAsyncLifetime
 
     public async Task InitializeAsync()
     {
+        SetTestUser(_mainUser.Id.ToString(), _mainUser.Role.ToString());
+
         await Context.Users.AddAsync(_mainUser);
         await Context.Restaurants.AddAsync(_mainRestaurant);
         await Context.Orders.AddAsync(_mainOrder);
