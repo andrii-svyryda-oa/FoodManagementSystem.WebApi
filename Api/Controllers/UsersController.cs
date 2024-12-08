@@ -16,10 +16,17 @@ public class UsersController(ISender sender, IUserQueries userQueries, IConfigur
 {
     [AuthorizeRoles("Admin")]
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<UserDto>>> GetAll(CancellationToken cancellationToken)
+    public async Task<ActionResult<PaginatedData<UserDto>>> GetAll(
+        [FromQuery] int pageSize, 
+        [FromQuery] int page,
+        CancellationToken cancellationToken,
+        [FromQuery] string searchText = "")
     {
-        var entities = await userQueries.GetAll(cancellationToken);
-        return entities.Select(UserDto.FromDomainModel).ToList();
+        var skip = (page - 1) * pageSize;
+
+        var (entities, count) = await userQueries.GetAll(skip, pageSize, searchText, cancellationToken);
+
+        return new PaginatedData<UserDto>(entities.Select(UserDto.FromDomainModel).ToList(), count);
     }
 
     [AuthorizeRoles("Admin")]

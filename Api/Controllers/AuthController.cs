@@ -35,7 +35,7 @@ namespace Api.Controllers
                             {
                                 HttpOnly = true,
                                 Secure = true,
-                                SameSite = SameSiteMode.Strict,
+                                SameSite = SameSiteMode.None,
                                 Expires = DateTime.UtcNow.AddMinutes(int.Parse(configuration["Jwt:ExpireMinutes"]!))
                             });
 
@@ -44,6 +44,15 @@ namespace Api.Controllers
                         _ => Unauthorized("Invalid email or password."));
                 },
                 () => Unauthorized("Invalid email or password."));
+        }
+
+        [Authorize]
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            Response.Cookies.Delete("JwtToken");
+
+            return Ok(new { Message = "Logout successful" });
         }
 
         [Authorize]
@@ -58,7 +67,7 @@ namespace Api.Controllers
                     var user = await userQueries.GetById(new UserId(userId), CancellationToken.None);
 
                     return user.Match<IActionResult>(
-                        u => Ok(new { u.Name, u.Email }),
+                        u => Ok(new { u.Name, u.Email, u.Role }),
                         () => NotFound("User not found."));
                 },
                 () => Task.FromResult<IActionResult>(Unauthorized("No userId in claims.")));

@@ -28,11 +28,23 @@ public class UserRepository(ApplicationDbContext context) : IUserRepository, IUs
         return entities;
     }
 
-    public async Task<IReadOnlyList<User>> GetAll(CancellationToken cancellationToken)
+    public async Task<(IReadOnlyList<User>, int)> GetAll(int skip, int take, string searchText, CancellationToken cancellationToken)
     {
-        return await context.Users
-            .AsNoTracking()
-            .ToListAsync(cancellationToken);
+        var query = context.Users.AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(searchText))
+        {
+            var pattern = $"%{searchText.ToLower()}%";
+
+            query = query.Where(
+                x => EF.Functions.Like(x.Name.ToLower(), pattern) &&
+                EF.Functions.Like(x.Email.ToLower(), pattern));
+        }
+
+        var count = await query.CountAsync(cancellationToken);
+        var result = await query.Skip(skip).Take(take).ToListAsync(cancellationToken);
+
+        return (result, count);
     }
 
     public async Task<Option<User>> GetByEmail(string email, CancellationToken cancellationToken)
