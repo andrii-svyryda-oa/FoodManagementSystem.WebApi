@@ -17,9 +17,9 @@ public class ChangeUserBalanceCommandHandler(IUserRepository userRepository)
 
         return await user.Match(
             async u => {
-                var newBalance = u.Balance + request.Difference;
+                var difference = request.Difference;
 
-                return await UpdateEntity(u, newBalance, cancellationToken);
+                return await UpdateEntity(u, difference, cancellationToken);
             },
             () => Task.FromResult<Result<User, UserException>>(new UserNotFoundException(userId)));
     }

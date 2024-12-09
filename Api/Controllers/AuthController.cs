@@ -67,7 +67,7 @@ namespace Api.Controllers
                     var user = await userQueries.GetById(new UserId(userId), CancellationToken.None);
 
                     return user.Match<IActionResult>(
-                        u => Ok(new { u.Name, u.Email, u.Role }),
+                        u => Ok(new { u.Name, u.Email, u.Role, Id = u.Id.Value, u.Balance }),
                         () => NotFound("User not found."));
                 },
                 () => Task.FromResult<IActionResult>(Unauthorized("No userId in claims.")));
