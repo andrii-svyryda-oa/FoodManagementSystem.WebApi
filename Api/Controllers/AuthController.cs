@@ -50,7 +50,12 @@ namespace Api.Controllers
         [HttpPost("logout")]
         public IActionResult Logout()
         {
-            Response.Cookies.Delete("JwtToken");
+            Response.Cookies.Delete("JwtToken", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+            });
 
             return Ok(new { Message = "Logout successful" });
         }
