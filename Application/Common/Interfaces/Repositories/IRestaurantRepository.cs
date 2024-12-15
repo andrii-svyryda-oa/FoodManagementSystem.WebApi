@@ -10,5 +10,4 @@ public interface IRestaurantRepository
     Task<Restaurant> Delete(Restaurant restaurant, CancellationToken cancellationToken);
     Task<Option<Restaurant>> GetById(RestaurantId id, CancellationToken cancellationToken);
     Task<Option<Restaurant>> GetByName(string name, CancellationToken cancellationToken);
-    Task<IReadOnlyList<Restaurant>> GetAll(CancellationToken cancellationToken);
 }

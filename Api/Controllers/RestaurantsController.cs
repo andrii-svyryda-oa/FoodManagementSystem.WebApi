@@ -6,6 +6,7 @@ using Domain.Restaurants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Api.Controllers;
 
@@ -15,11 +16,17 @@ public class RestaurantsController(ISender sender, IRestaurantQueries restaurant
 {
     [Authorize]
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<RestaurantDto>>> GetAll(CancellationToken cancellationToken)
+    public async Task<ActionResult<PaginatedData<RestaurantDto>>> GetAll(
+        [FromQuery] int pageSize,
+        [FromQuery] int page,
+        CancellationToken cancellationToken,
+        [FromQuery] string searchText = "")
     {
-        var entities = await restaurantQueries.GetAll(cancellationToken);
+        var skip = (page - 1) * pageSize;
 
-        return entities.Select(RestaurantDto.FromDomainModel).ToList();
+        var (entities, count) = await restaurantQueries.GetAll(skip, pageSize, searchText, cancellationToken);
+
+        return new PaginatedData<RestaurantDto>(entities.Select(RestaurantDto.FromDomainModel).ToList(), count);
     }
 
     [AuthorizeRoles("Admin")]

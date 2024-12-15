@@ -4,5 +4,5 @@ namespace Application.Common.Interfaces.Queries;
 
 public interface IRestaurantQueries
 {
-    Task<IReadOnlyList<Restaurant>> GetAll(CancellationToken cancellationToken);
+    Task<(IReadOnlyList<Restaurant>, int)> GetAll(int skip, int take, string searchText, CancellationToken cancellationToken);
 }

@@ -27,11 +27,23 @@ public class RestaurantRepository(ApplicationDbContext context) : IRestaurantRep
         return entity == null ? Option.None<Restaurant>() : Option.Some(entity);
     }
 
-    public async Task<IReadOnlyList<Restaurant>> GetAll(CancellationToken cancellationToken)
+    public async Task<(IReadOnlyList<Restaurant>, int)> GetAll(int skip, int take, string searchText, CancellationToken cancellationToken)
     {
-        return await context.Restaurants
-            .AsNoTracking()
-            .ToListAsync(cancellationToken);
+        var query = context.Restaurants.AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(searchText))
+        {
+            var pattern = $"%{searchText.ToLower()}%";
+
+            query = query.Where(
+                x => EF.Functions.Like(x.Name.ToLower(), pattern) &&
+                EF.Functions.Like(x.Description.ToLower(), pattern));
+        }
+
+        var count = await query.CountAsync(cancellationToken);
+        var result = await query.Skip(skip).Take(take).ToListAsync(cancellationToken);
+
+        return (result, count);
     }
 
     public async Task<Restaurant> Add(Restaurant restaurant, CancellationToken cancellationToken)
